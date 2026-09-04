@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { apiPut } from "../utils";
+import { Help } from "./Guide";
 
 export default function BusinessProfile({ profile, setProfile, setError }) {
   const [form, setForm] = useState(profile);
@@ -35,7 +36,10 @@ export default function BusinessProfile({ profile, setProfile, setError }) {
             <input value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} style={{ width: "100%" }} />
           </div>
           <div className="field">
-            <label>GSTIN (optional)</label>
+            <label>
+              GSTIN (optional)
+              <Help text="Goods and Services Tax registration number — a 15-character ID. Only fill this in if your business is GST-registered. Most students and small freelancers leave this blank." />
+            </label>
             <input
               value={form.gstin}
               onChange={(e) => setForm({ ...form, gstin: e.target.value.toUpperCase() })}
@@ -44,7 +48,10 @@ export default function BusinessProfile({ profile, setProfile, setError }) {
             />
           </div>
           <div className="field">
-            <label>PAN (optional)</label>
+            <label>
+              PAN (optional)
+              <Help text="Permanent Account Number — the 10-character ID every Indian taxpayer has. Used to identify you on invoices and tax filings." />
+            </label>
             <input
               value={form.pan}
               onChange={(e) => setForm({ ...form, pan: e.target.value.toUpperCase() })}

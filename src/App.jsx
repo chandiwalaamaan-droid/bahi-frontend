@@ -1,20 +1,32 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import { CSS } from "./styles";
 import { setUnauthorizedHandler, TOKEN_KEY, apiGet } from "./utils";
 import { TABS } from "./constants";
+import { NAV_ICONS, IconHelp } from "./Icons";
 import AuthScreen from "./components/AuthScreen";
-import Dashboard from "./components/Dashboard";
 import Transactions from "./components/Transactions";
-import Invoices from "./components/Invoices";
 import TaxCalculator from "./components/TaxCalculator";
 import GstCalculator from "./components/GstCalculator";
-import Advisor from "./components/Advisor";
 import BusinessProfile from "./components/BusinessProfile";
+import Guide from "./components/Guide";
+import Support from "./components/Support";
+
+// Split out the two heaviest tabs (recharts + react-markdown/remark-gfm)
+// so the initial bundle doesn't pay for them until the user opens that tab.
+const Dashboard = lazy(() => import("./components/Dashboard"));
+const Advisor = lazy(() => import("./components/Advisor"));
+const Invoices = lazy(() => import("./components/Invoices"));
+
+const TabFallback = () => <p className="empty">Loading…</p>;
+
+const GUIDE_SEEN_KEY = "bahi_guide_seen";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [tab, setTab] = useState("dashboard");
+  const [showGuide, setShowGuide] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [txns, setTxns] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -52,6 +64,16 @@ export default function App() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    if (!localStorage.getItem(GUIDE_SEEN_KEY)) {
+      setShowGuide(true);
+      localStorage.setItem(GUIDE_SEEN_KEY, "1");
+    }
+  }, [user]);
+
+  const closeGuide = useCallback(() => setShowGuide(false), []);
 
   useEffect(() => {
     if (!user) return;
@@ -98,15 +120,32 @@ export default function App() {
         <aside className="side">
           <div className="brand">
             <div className="mark">Bahi</div>
-            <div className="tag">Your AI chartered accountant</div>
+            <div className="tag">AI-assisted bookkeeping — not a licensed CA</div>
+            <div className="tag" style={{ marginTop: 2 }}>Free to use</div>
           </div>
           <nav>
-            {TABS.map((t) => (
-              <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => setTab(t.id)}>
-                {t.label}
-              </button>
-            ))}
+            {TABS.map((t) => {
+              const Icon = NAV_ICONS[t.id];
+              return (
+                <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => setTab(t.id)}>
+                  {Icon && <Icon className="navicon" />}
+                  {t.label}
+                </button>
+              );
+            })}
           </nav>
+          <div className="helpbtn">
+            <button onClick={() => setShowGuide(true)}>
+              <IconHelp className="navicon" />
+              Guide
+            </button>
+          </div>
+          <div className="helpbtn">
+            <button onClick={() => setShowSupport(true)}>
+              <IconHelp className="navicon" />
+              FAQ &amp; Support
+            </button>
+          </div>
           <div className="logout">
             <div style={{ fontSize: 12, color: "var(--slate)", marginBottom: 8 }}>{user.email}</div>
             <button onClick={logout}>Sign out</button>
@@ -117,7 +156,7 @@ export default function App() {
           {!loaded ? (
             <p className="empty">Opening the ledger…</p>
           ) : (
-            <>
+            <Suspense fallback={<TabFallback />}>
               {tab === "dashboard" && <Dashboard txns={txns} invoices={invoices} />}
               {tab === "transactions" && <Transactions txns={txns} setTxns={setTxns} setError={setError} />}
               {tab === "invoices" && <Invoices invoices={invoices} setInvoices={setInvoices} setError={setError} profile={profile} />}
@@ -125,10 +164,12 @@ export default function App() {
               {tab === "gst" && <GstCalculator />}
               {tab === "advisor" && <Advisor chat={chat} setChat={setChat} />}
               {tab === "settings" && <BusinessProfile profile={profile} setProfile={setProfile} setError={setError} />}
-            </>
+            </Suspense>
           )}
         </main>
       </div>
+      {showGuide && <Guide onClose={closeGuide} />}
+      {showSupport && <Support onClose={() => setShowSupport(false)} />}
     </div>
   );
 }

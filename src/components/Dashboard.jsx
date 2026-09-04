@@ -1,6 +1,7 @@
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { fmtR, monthKey, monthLabel, todayISO } from "../utils";
+import { fmtR, monthKey, monthLabel, todayISO, calcSlabTax, NEW_SLABS } from "../utils";
+import { Help } from "./Guide";
 
 export default function Dashboard({ txns, invoices }) {
   const now = todayISO().slice(0, 7);
@@ -20,7 +21,7 @@ export default function Dashboard({ txns, invoices }) {
     .reduce((s, t) => s + t.amount, 0) * (12 / (new Date().getMonth() + 1));
   const netProfit = Math.max(0, annualIncome - annualExpense);
   // Rough estimate: 50% presumptive or slab on net profit, whichever is lower
-  const slabTax = computeSlab(annualIncome - annualExpense) * 0.5; // simplified: apply slab to net, 50% presumptive
+  const slabTax = calcSlabTax(annualIncome - annualExpense, NEW_SLABS) * 0.5; // simplified: apply slab to net, 50% presumptive
   const estTax = Math.min(slabTax, netProfit * 0.3);
   const monthlyProgress = Math.min(100, ((new Date().getDate() / 30) * 100));
 
@@ -74,8 +75,12 @@ export default function Dashboard({ txns, invoices }) {
           <div className="val">{fmtR(annualExpense)}</div>
         </div>
         <div className="stat warn">
-          <div className="lbl">Est. tax liability (FY 2025–26)</div>
+          <div className="lbl">
+            Est. tax liability (FY 2025–26)
+            <Help text="A rough, simplified projection based on this month's numbers scaled to a full year — not a real tax calculation. It doesn't account for deductions, other income, or exact filing rules. Use the Tax Calculator tab for a proper estimate, and confirm with a CA before filing." />
+          </div>
           <div className="val">{fmtR(estTax)}</div>
+          <div className="hint">Rough estimate, not tax advice</div>
         </div>
         <div className="stat">
           <div className="lbl">Monthly progress</div>
@@ -128,22 +133,3 @@ export default function Dashboard({ txns, invoices }) {
   );
 }
 
-function computeSlab(net) {
-  const slabs = [
-    [0, 400000, 0],
-    [400000, 800000, 0.05],
-    [800000, 1200000, 0.1],
-    [1200000, 1600000, 0.15],
-    [1600000, 2000000, 0.2],
-    [2000000, 2400000, 0.25],
-    [2400000, null, 0.3],
-  ];
-  let tax = 0;
-  for (const [from, to, rate] of slabs) {
-    if (net > from) {
-      const upper = to === null ? net : Math.min(net, to);
-      tax += (upper - from) * rate;
-    }
-  }
-  return Math.max(0, tax);
-}

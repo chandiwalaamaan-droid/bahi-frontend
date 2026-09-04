@@ -10,6 +10,30 @@ export const monthLabel = (key) => {
   return new Date(y, m - 1, 1).toLocaleString("en-IN", { month: "short", year: "2-digit" });
 };
 
+// Turns an array of same-shaped row objects into a downloadable CSV file,
+// e.g. downloadCSV("transactions.csv", txns, ["date","type","category","amount","note"]).
+// Handles quoting for commas/quotes/newlines so a note like `Client said "thanks"`
+// doesn't corrupt the file.
+export function downloadCSV(filename, rows, columns) {
+  const escape = (val) => {
+    const s = val === null || val === undefined ? "" : String(val);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const header = columns.join(",");
+  const lines = rows.map((row) => columns.map((col) => escape(row[col])).join(","));
+  const csv = [header, ...lines].join("\r\n");
+  // Prepend a UTF-8 BOM so ₹ and other non-ASCII characters open correctly in Excel.
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export function calcSlabTax(income, slabs) {
   let tax = 0;
   for (const [from, to, rate] of slabs) {

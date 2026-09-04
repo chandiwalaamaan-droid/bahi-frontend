@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { CSS } from "../styles";
 import { apiAuth, TOKEN_KEY } from "../utils";
+import TaxCalculator from "./TaxCalculator";
+import GstCalculator from "./GstCalculator";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export default function AuthScreen({ onAuthed }) {
-  // modes: "login" | "register" | "forgot" | "reset"
+  // modes: "login" | "register" | "forgot" | "reset" | "calculators"
   const [mode, setMode] = useState("login");
+  const [googleError, setGoogleError] = useState("");
+  const googleBtnRef = useRef(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,6 +34,56 @@ export default function AuthScreen({ onAuthed }) {
       window.history.replaceState({}, "", window.location.pathname + (rest ? `?${rest}` : ""));
     }
   }, []);
+
+  const handleGoogleCredential = useCallback(
+    async (response) => {
+      setGoogleError("");
+      setError("");
+      try {
+        const data = await apiAuth("/google", { credential: response.credential });
+        localStorage.setItem(TOKEN_KEY, data.token);
+        onAuthed(data.user);
+      } catch (err) {
+        setGoogleError(err.message || "Google sign-in failed.");
+      }
+    },
+    [onAuthed]
+  );
+
+  // Render the "Sign in with Google" button whenever we're on the login or
+  // register screen. The GIS script tag loads async, so poll briefly for it
+  // instead of assuming it's ready on mount.
+  useEffect(() => {
+    if (mode !== "login" && mode !== "register") return;
+    if (!GOOGLE_CLIENT_ID) return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const tryRender = () => {
+      if (cancelled) return;
+      if (window.google?.accounts?.id && googleBtnRef.current) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredential,
+        });
+        googleBtnRef.current.innerHTML = "";
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: "outline",
+          size: "large",
+          width: 320,
+          text: mode === "register" ? "signup_with" : "signin_with",
+        });
+        return;
+      }
+      attempts += 1;
+      if (attempts < 40) setTimeout(tryRender, 150); // poll up to ~6s for the script to load
+    };
+    tryRender();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mode, handleGoogleCredential]);
 
   const switchMode = (next) => {
     setMode(next);
@@ -90,13 +146,49 @@ export default function AuthScreen({ onAuthed }) {
     }
   };
 
+  if (mode === "calculators") {
+    return (
+      <div className="bahi">
+        <style>{CSS}</style>
+        <div className="auth-wrap">
+          <div style={{ width: "100%", maxWidth: 720 }}>
+            <div style={{ textAlign: "center", marginBottom: 22 }}>
+              <div className="mark" style={{ fontFamily: "'Source Serif 4',serif", fontSize: 32, fontWeight: 700, color: "var(--primary)" }}>Bahi</div>
+              <p style={{ fontSize: 13, color: "var(--slate)", marginTop: 6 }}>
+                Free to use, no account needed — these run entirely in your browser.
+                Sign in if you'd like your numbers saved and a personalized dashboard.
+              </p>
+            </div>
+            <TaxCalculator />
+            <GstCalculator />
+            <div style={{ textAlign: "center", marginTop: 8 }}>
+              <button className="link-btn" onClick={() => switchMode("login")}>← Back to sign in</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bahi">
       <style>{CSS}</style>
       <div className="auth-wrap">
         <div className="auth-card">
           <div className="mark">Bahi</div>
-          <div className="tag">Your AI chartered accountant</div>
+          <div className="tag">Simple books for freelancers &amp; students — no accounting degree needed. Free to use.</div>
+
+          {(mode === "login" || mode === "register") && GOOGLE_CLIENT_ID && (
+            <div style={{ marginBottom: 16 }}>
+              <div ref={googleBtnRef} style={{ display: "flex", justifyContent: "center" }} />
+              {googleError && <div className="auth-error">{googleError}</div>}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "16px 0" }}>
+                <div style={{ flex: 1, height: 1, background: "var(--rule)" }} />
+                <span style={{ fontSize: 12, color: "var(--slate)" }}>or use email</span>
+                <div style={{ flex: 1, height: 1, background: "var(--rule)" }} />
+              </div>
+            </div>
+          )}
 
           {(mode === "login" || mode === "register") && (
             <form onSubmit={submitLoginOrRegister}>
@@ -219,6 +311,13 @@ export default function AuthScreen({ onAuthed }) {
               </>
             )}
           </div>
+
+          {(mode === "login" || mode === "register") && (
+            <div className="auth-switch" style={{ marginTop: 8 }}>
+              Just want the Tax/GST calculators?{" "}
+              <button onClick={() => switchMode("calculators")}>Use them without an account</button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { fmtR, computeNewRegime, computeOldRegime } from "../utils";
+import { Help } from "./Guide";
 
 export default function TaxCalculator() {
   const [gross, setGross] = useState(1200000);
@@ -17,7 +18,10 @@ export default function TaxCalculator() {
   return (
     <div>
       <div className="pagehead">
-        <h1>Tax Calculator</h1>
+        <h1>
+          Tax Calculator
+          <Help text="Two ways India lets you calculate income tax — the new regime has lower rates but fewer deductions, the old regime has higher rates but lets you subtract things like insurance first. This tool works out which one costs you less." />
+        </h1>
         <p>Old vs new regime, FY 2025–26 (AY 2026–27) slab rates.</p>
       </div>
       <div className="card">
@@ -42,15 +46,24 @@ export default function TaxCalculator() {
             </select>
           </div>
           <div className="field">
-            <label>Section 80C investments (max ₹1,50,000)</label>
+            <label>
+              Section 80C investments (max ₹1,50,000)
+              <Help text="Money in things like PPF, ELSS mutual funds, life insurance premiums, or tuition fees — these reduce your taxable income under the old regime only." />
+            </label>
             <input type="number" value={c80c} onChange={(e) => setC80c(+e.target.value)} style={{ width: "100%" }} />
           </div>
           <div className="field">
-            <label>Section 80D — medical insurance (max ₹25,000 self, up to ₹50,000 if 60+)</label>
+            <label>
+              Section 80D — medical insurance (max ₹25,000 self, up to ₹50,000 if 60+)
+              <Help text="Premiums you paid for health insurance for yourself or family — also only deductible under the old regime." />
+            </label>
             <input type="number" value={c80d} onChange={(e) => setC80d(+e.target.value)} style={{ width: "100%" }} />
           </div>
           <div className="field">
-            <label>Section 80CCD(1B) — NPS additional (max ₹50,000)</label>
+            <label>
+              Section 80CCD(1B) — NPS additional (max ₹50,000)
+              <Help text="Extra money you put into the National Pension System, a government retirement savings scheme — deductible on top of 80C." />
+            </label>
             <input type="number" value={c80ccd} onChange={(e) => setC80ccd(+e.target.value)} style={{ width: "100%" }} />
           </div>
           <div className="field">

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { apiPost, apiPut, apiDelete, fmtR, uid, todayISO } from "../utils";
+import { apiPost, apiPut, apiDelete, fmtR, uid, todayISO, downloadCSV } from "../utils";
 import { CATEGORIES } from "../constants";
 
 export default function Transactions({ txns, setTxns, setError }) {
@@ -77,11 +77,24 @@ export default function Transactions({ txns, setTxns, setError }) {
 
   const sorted = [...txns].sort((a, b) => b.date.localeCompare(a.date));
 
+  const exportCSV = () => {
+    downloadCSV(
+      `bahi-transactions-${todayISO()}.csv`,
+      sorted,
+      ["date", "type", "category", "amount", "note"]
+    );
+  };
+
   return (
     <div>
-      <div className="pagehead">
-        <h1>Transactions</h1>
-        <p>Log income and expenses to keep your books current.</p>
+      <div className="pagehead" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <div>
+          <h1>Transactions</h1>
+          <p>Log income and expenses to keep your books current.</p>
+        </div>
+        <button className="btn ghost sm" onClick={exportCSV} disabled={sorted.length === 0} style={{ marginBottom: 16 }}>
+          Export CSV
+        </button>
       </div>
 
       <div className="card">
