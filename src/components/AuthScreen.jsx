@@ -3,7 +3,6 @@ import { CSS } from "../styles";
 import { apiAuth, TOKEN_KEY } from "../utils";
 import TaxCalculator from "./TaxCalculator";
 import GstCalculator from "./GstCalculator";
-import Legal from "./Legal";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -21,7 +20,6 @@ export default function AuthScreen({ onAuthed }) {
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const [legalTab, setLegalTab] = useState(null); // "terms" | "privacy" | null
 
   // If the user arrived via a password-reset email link (?resetToken=...),
   // jump straight into the reset-password form.
@@ -254,9 +252,9 @@ export default function AuthScreen({ onAuthed }) {
                   />
                   <span>
                     I agree to the{" "}
-                    <button type="button" className="link-btn" onClick={() => setLegalTab("terms")}>Terms of Service</button>
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="link-btn">Terms of Service</a>
                     {" "}and{" "}
-                    <button type="button" className="link-btn" onClick={() => setLegalTab("privacy")}>Privacy Policy</button>.
+                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="link-btn">Privacy Policy</a>.
                   </span>
                 </label>
               )}
@@ -349,13 +347,12 @@ export default function AuthScreen({ onAuthed }) {
           )}
 
           <div style={{ textAlign: "center", marginTop: 22, fontSize: 12, color: "var(--slate)" }}>
-            <button type="button" className="link-btn" onClick={() => setLegalTab("terms")}>Terms of Service</button>
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="link-btn">Terms of Service</a>
             <span style={{ margin: "0 6px" }}>·</span>
-            <button type="button" className="link-btn" onClick={() => setLegalTab("privacy")}>Privacy Policy</button>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="link-btn">Privacy Policy</a>
           </div>
         </div>
       </div>
-      {legalTab && <Legal initialTab={legalTab} onClose={() => setLegalTab(null)} />}
     </div>
   );
 }

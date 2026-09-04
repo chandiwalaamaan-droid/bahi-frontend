@@ -10,7 +10,6 @@ import GstCalculator from "./components/GstCalculator";
 import BusinessProfile from "./components/BusinessProfile";
 import Guide from "./components/Guide";
 import Support from "./components/Support";
-import Legal from "./components/Legal";
 
 // Split out the two heaviest tabs (recharts + react-markdown/remark-gfm)
 // so the initial bundle doesn't pay for them until the user opens that tab.
@@ -28,7 +27,6 @@ export default function App() {
   const [tab, setTab] = useState("dashboard");
   const [showGuide, setShowGuide] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
-  const [legalTab, setLegalTab] = useState(null); // "terms" | "privacy" | null
   const [loaded, setLoaded] = useState(false);
   const [txns, setTxns] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -153,9 +151,9 @@ export default function App() {
           </div>
           <div className="logout">
             <div style={{ fontSize: 11, color: "var(--slate)", marginBottom: 10 }}>
-              <button className="link-btn" onClick={() => setLegalTab("terms")}>Terms</button>
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="link-btn" style={{ textDecoration: "underline" }}>Terms</a>
               <span style={{ margin: "0 5px" }}>·</span>
-              <button className="link-btn" onClick={() => setLegalTab("privacy")}>Privacy</button>
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="link-btn" style={{ textDecoration: "underline" }}>Privacy</a>
             </div>
             <div style={{ fontSize: 12, color: "var(--slate)", marginBottom: 8 }}>{user.email}</div>
             <button onClick={logout}>Sign out</button>
@@ -180,7 +178,6 @@ export default function App() {
       </div>
       {showGuide && <Guide onClose={closeGuide} />}
       {showSupport && <Support onClose={() => setShowSupport(false)} />}
-      {legalTab && <Legal initialTab={legalTab} onClose={() => setLegalTab(null)} />}
     </div>
   );
 }
