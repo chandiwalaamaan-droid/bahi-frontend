@@ -3,6 +3,7 @@ import { CSS } from "../styles";
 import { apiAuth, TOKEN_KEY } from "../utils";
 import TaxCalculator from "./TaxCalculator";
 import GstCalculator from "./GstCalculator";
+import Legal from "./Legal";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -19,6 +20,8 @@ export default function AuthScreen({ onAuthed }) {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [legalTab, setLegalTab] = useState(null); // "terms" | "privacy" | null
 
   // If the user arrived via a password-reset email link (?resetToken=...),
   // jump straight into the reset-password form.
@@ -95,6 +98,10 @@ export default function AuthScreen({ onAuthed }) {
     e.preventDefault();
     setError("");
     setInfo("");
+    if (mode === "register" && !agreed) {
+      setError("Please agree to the Terms of Service and Privacy Policy to continue.");
+      return;
+    }
     setBusy(true);
     try {
       const path = mode === "login" ? "/login" : "/register";
@@ -153,7 +160,10 @@ export default function AuthScreen({ onAuthed }) {
         <div className="auth-wrap">
           <div style={{ width: "100%", maxWidth: 720 }}>
             <div style={{ textAlign: "center", marginBottom: 22 }}>
-              <div className="mark" style={{ fontFamily: "'Source Serif 4',serif", fontSize: 32, fontWeight: 700, color: "var(--primary)" }}>Bahi</div>
+              <div className="mark" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, fontFamily: "'Source Serif 4',serif", fontSize: 32, fontWeight: 700, color: "var(--primary)" }}>
+                <img src="/logo.png" alt="" width={36} height={36} style={{ borderRadius: 8 }} />
+                Bahi
+              </div>
               <p style={{ fontSize: 13, color: "var(--slate)", marginTop: 6 }}>
                 Free to use, no account needed — these run entirely in your browser.
                 Sign in if you'd like your numbers saved and a personalized dashboard.
@@ -175,7 +185,10 @@ export default function AuthScreen({ onAuthed }) {
       <style>{CSS}</style>
       <div className="auth-wrap">
         <div className="auth-card">
-          <div className="mark">Bahi</div>
+          <div className="mark" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <img src="/logo.png" alt="" width={30} height={30} style={{ borderRadius: 7 }} />
+            Bahi
+          </div>
           <div className="tag">Simple books for freelancers &amp; students — no accounting degree needed. Free to use.</div>
 
           {(mode === "login" || mode === "register") && GOOGLE_CLIENT_ID && (
@@ -231,8 +244,24 @@ export default function AuthScreen({ onAuthed }) {
                   </button>
                 </div>
               )}
+              {mode === "register" && (
+                <label style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 12.5, color: "var(--slate)", margin: "4px 0 16px" }}>
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    style={{ marginTop: 2 }}
+                  />
+                  <span>
+                    I agree to the{" "}
+                    <button type="button" className="link-btn" onClick={() => setLegalTab("terms")}>Terms of Service</button>
+                    {" "}and{" "}
+                    <button type="button" className="link-btn" onClick={() => setLegalTab("privacy")}>Privacy Policy</button>.
+                  </span>
+                </label>
+              )}
               {error && <div className="auth-error">{error}</div>}
-              <button className="btn" type="submit" disabled={busy}>
+              <button className="btn" type="submit" disabled={busy || (mode === "register" && !agreed)}>
                 {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
               </button>
             </form>
@@ -318,8 +347,15 @@ export default function AuthScreen({ onAuthed }) {
               <button onClick={() => switchMode("calculators")}>Use them without an account</button>
             </div>
           )}
+
+          <div style={{ textAlign: "center", marginTop: 22, fontSize: 12, color: "var(--slate)" }}>
+            <button type="button" className="link-btn" onClick={() => setLegalTab("terms")}>Terms of Service</button>
+            <span style={{ margin: "0 6px" }}>·</span>
+            <button type="button" className="link-btn" onClick={() => setLegalTab("privacy")}>Privacy Policy</button>
+          </div>
         </div>
       </div>
+      {legalTab && <Legal initialTab={legalTab} onClose={() => setLegalTab(null)} />}
     </div>
   );
 }
