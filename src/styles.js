@@ -48,7 +48,7 @@ html.dark .bahi::before{
 }
 
 .bahi h1,.bahi h2,.bahi h3{font-family:'Source Serif 4',serif;font-weight:600;margin:0;letter-spacing:-0.01em;}
-.bahi .shell{display:flex;min-height:100vh;position:relative;z-index:1;}
+.bahi .shell{display:flex;min-height:100vh;}
 
 /* ---------- Sidebar ---------- */
 .bahi .side{width:230px;flex-shrink:0;background:var(--card);border-right:1px solid var(--rule);padding:22px 0;
@@ -97,15 +97,8 @@ html.dark .bahi::before{
 /* ---------- Stat tiles ---------- */
 .bahi .stat{border:1px solid var(--rule);border-radius:14px;padding:17px 19px;min-width:170px;flex:1;
   background:var(--card);box-shadow:var(--shadow-sm);border-left:3px solid var(--rule);
-  position:relative;overflow:hidden;transition:transform 0.18s ease, box-shadow 0.18s ease;}
+  position:relative;transition:transform 0.18s ease, box-shadow 0.18s ease;}
 .bahi .stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
-.bahi .stat::after{
-  /* a small folded-corner motif, quietly nodding to a page of the ledger */
-  content:"";position:absolute;top:0;right:0;width:0;height:0;
-  border-style:solid;border-width:0 16px 16px 0;
-  border-color:transparent var(--rule) transparent transparent;
-  opacity:0.7;
-}
 .bahi .stat .lbl{font-size:12.5px;color:var(--slate);}
 .bahi .stat .val{font-family:'Source Serif 4',serif;font-size:26px;margin-top:6px;}
 .bahi .stat.pos{border-left-color:var(--green);}
