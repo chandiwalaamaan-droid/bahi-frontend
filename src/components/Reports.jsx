@@ -99,7 +99,7 @@ export default function Reports({ txns, invoices }) {
     );
   };
 
-  if (loading) return <p className="empty">Loading reports…</p>;
+  if (loading) return <div className="loader"><div className="ring" /><p>Loading reports…</p></div>;
 
   return (
     <div>
@@ -330,11 +330,11 @@ export default function Reports({ txns, invoices }) {
                         ...Object.entries(trends.categoryBreakdown.income).map(([cat, amt]) => ({ name: cat, value: Number(amt), type: "income" })),
                         ...Object.entries(trends.categoryBreakdown.expense).map(([cat, amt]) => ({ name: cat, value: Number(amt), type: "expense" })),
                       ].map((entry, i) => {
-                        const fillColor = entry.type === "income" ? "#3BB06B" : "#D14A55";
-                        return <Cell key={i} fill={fillColor} />;
+                        const fillColor = entry.type === "income" ? "var(--green)" : "var(--seal)";
+                        return <Cell key={i} fill={fillColor} stroke="var(--card)" strokeWidth={2} />;
                       })}
                     </Pie>
-                    <Tooltip formatter={(v) => fmtR(v)} />
+                    <Tooltip formatter={(v) => fmtR(v)} contentStyle={{ fontSize: 12, border: "1px solid var(--rule)", background: "var(--card)", color: "var(--ink)", borderRadius: 10, boxShadow: "var(--shadow-md)" }} labelStyle={{ color: "var(--ink)" }} itemStyle={{ color: "var(--ink)" }} />
                   </PieChart>
                 </div>
               )}

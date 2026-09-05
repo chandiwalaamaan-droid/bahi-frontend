@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { CSS } from "../styles";
-import { apiAuth, TOKEN_KEY } from "../utils";
+import { apiAuth, TOKEN_KEY, getDarkMode } from "../utils";
 import TaxCalculator from "./TaxCalculator";
 import GstCalculator from "./GstCalculator";
 
@@ -68,10 +68,17 @@ export default function AuthScreen({ onAuthed }) {
           callback: handleGoogleCredential,
         });
         googleBtnRef.current.innerHTML = "";
+        // Google's button takes a fixed pixel width, not a percentage, so a
+        // hardcoded value (e.g. 320) overflows the card on narrow phones.
+        // Measure the actual container instead and clamp it to a sane range.
+        const measuredWidth = Math.round(googleBtnRef.current.getBoundingClientRect().width) || 320;
+        // Match the button's theme to light/dark mode so it blends into the
+        // card instead of sitting there as a stark white box.
         window.google.accounts.id.renderButton(googleBtnRef.current, {
-          theme: "outline",
+          theme: getDarkMode() ? "filled_black" : "outline",
+          shape: "pill",
           size: "large",
-          width: 320,
+          width: Math.min(Math.max(measuredWidth, 200), 400),
           text: mode === "register" ? "signup_with" : "signin_with",
         });
         return;
@@ -183,20 +190,21 @@ export default function AuthScreen({ onAuthed }) {
       <style>{CSS}</style>
       <div className="auth-wrap">
         <div className="auth-card">
-          <div className="mark" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            <img src="/logo.png" alt="" width={30} height={30} style={{ borderRadius: 7 }} />
-            Bahi
+          <div className="auth-seal">
+            <img src="/logo.png" alt="" width={32} height={32} style={{ borderRadius: 8 }} />
           </div>
+          <div className="mark">Bahi</div>
           <div className="tag">ur personal CA — AI-assisted bookkeeping, free to use.</div>
 
           {(mode === "login" || mode === "register") && GOOGLE_CLIENT_ID && (
             <div style={{ marginBottom: 16 }}>
               <div ref={googleBtnRef} style={{ display: "flex", justifyContent: "center" }} />
               {googleError && <div className="auth-error">{googleError}</div>}
-              <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "16px 0" }}>
-                <div style={{ flex: 1, height: 1, background: "var(--rule)" }} />
-                <span style={{ fontSize: 12, color: "var(--slate)" }}>or use email</span>
-                <div style={{ flex: 1, height: 1, background: "var(--rule)" }} />
+              <div className="auth-divider">
+                <div className="line" />
+                <span>or use email</span>
+                <div className="dot" />
+                <div className="line" />
               </div>
             </div>
           )}

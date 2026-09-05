@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import { CSS } from "./styles";
 import { setUnauthorizedHandler, TOKEN_KEY, apiGet, apiPost, getDarkMode, applyDarkMode, isIos, isStandalone } from "./utils";
 import { TABS } from "./constants";
-import { NAV_ICONS, IconHelp, IconTheme, IconBell, IconDownload } from "./Icons";
+import { NAV_ICONS, IconHelp, IconTheme, IconBell, IconDownload, IconMenu, IconClose } from "./Icons";
 import AuthScreen from "./components/AuthScreen";
 import Transactions from "./components/Transactions";
 import TaxCalculator from "./components/TaxCalculator";
@@ -18,7 +18,7 @@ const Advisor = lazy(() => import("./components/Advisor"));
 const Invoices = lazy(() => import("./components/Invoices"));
 const Reports = lazy(() => import("./components/Reports"));
 
-const TabFallback = () => <p className="empty">Loading…</p>;
+const TabFallback = () => <div className="loader"><div className="ring" /><p>Loading…</p></div>;
 
 const GUIDE_SEEN_KEY = "bahi_guide_seen";
 
@@ -40,6 +40,7 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showIosHint, setShowIosHint] = useState(false);
   const [appInstalled, setAppInstalled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
@@ -189,7 +190,7 @@ export default function App() {
     return (
       <div className="bahi">
         <style>{CSS}</style>
-        <div className="auth-wrap"><p className="empty">Opening the ledger…</p></div>
+        <div className="auth-wrap"><div className="loader"><div className="ring" /><p>Opening the ledger…</p></div></div>
       </div>
     );
   }
@@ -198,11 +199,31 @@ export default function App() {
     return <AuthScreen onAuthed={setUser} />;
   }
 
+  const selectTab = (id) => {
+    setTab(id);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className="bahi">
       <style>{CSS}</style>
+      <div className="mobi-topbar">
+        <div className="mark" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <img src="/logo.png" alt="" width={24} height={24} style={{ borderRadius: 6 }} />
+          Bahi
+        </div>
+        <button
+          className="mobi-menu-btn"
+          onClick={() => setMobileMenuOpen((s) => !s)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? <IconClose className="navicon" /> : <IconMenu className="navicon" />}
+        </button>
+      </div>
+      {mobileMenuOpen && <div className="mobi-overlay" onClick={() => setMobileMenuOpen(false)} />}
       <div className="shell">
-        <aside className="side">
+        <aside className={`side${mobileMenuOpen ? " open" : ""}`}>
           <div className="brand">
             <div className="mark" style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <img src="/logo.png" alt="" width={26} height={26} style={{ borderRadius: 6 }} />
@@ -215,7 +236,7 @@ export default function App() {
             {TABS.map((t) => {
               const Icon = NAV_ICONS[t.id];
               return (
-                <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => setTab(t.id)}>
+                <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => selectTab(t.id)}>
                   {Icon && <Icon className="navicon" />}
                   {t.label}
                 </button>
@@ -296,13 +317,13 @@ export default function App() {
             </button>
           </div>
           <div className="helpbtn">
-            <button onClick={() => setShowGuide(true)}>
+            <button onClick={() => { setShowGuide(true); setMobileMenuOpen(false); }}>
               <IconHelp className="navicon" />
               Guide
             </button>
           </div>
           <div className="helpbtn">
-            <button onClick={() => setShowSupport(true)}>
+            <button onClick={() => { setShowSupport(true); setMobileMenuOpen(false); }}>
               <IconHelp className="navicon" />
               FAQ &amp; Support
             </button>
@@ -320,7 +341,7 @@ export default function App() {
         <main className="main">
           {error && <div className="banner-error">{error}</div>}
           {!loaded ? (
-            <p className="empty">Opening the ledger…</p>
+            <div className="loader"><div className="ring" /><p>Opening the ledger…</p></div>
           ) : (
             <Suspense fallback={<TabFallback />}>
               {tab === "dashboard" && <Dashboard txns={txns} invoices={invoices} />}

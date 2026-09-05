@@ -96,10 +96,10 @@ export default function Dashboard({ txns, invoices }) {
               <CartesianGrid stroke="var(--rule)" vertical={false} />
               <XAxis dataKey="label" tick={{ fontSize: 12, fill: "var(--slate)" }} axisLine={{ stroke: "var(--rule)" }} tickLine={false} />
               <YAxis tick={{ fontSize: 12, fill: "var(--slate)" }} axisLine={{ stroke: "var(--rule)" }} tickLine={false} tickFormatter={(v) => `${v / 1000}k`} />
-              <Tooltip formatter={(v) => fmtR(v)} contentStyle={{ fontSize: 13, border: "1px solid var(--rule)" }} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="income" name="Income" fill="var(--green)" />
-              <Bar dataKey="expense" name="Expense" fill="var(--seal)" />
+              <Tooltip formatter={(v) => fmtR(v)} contentStyle={{ fontSize: 13, border: "1px solid var(--rule)", background: "var(--card)", color: "var(--ink)", borderRadius: 10, boxShadow: "var(--shadow-md)" }} labelStyle={{ color: "var(--ink)" }} itemStyle={{ color: "var(--ink)" }} cursor={{ fill: "var(--primary)", opacity: 0.06 }} />
+              <Legend wrapperStyle={{ fontSize: 12, color: "var(--slate)" }} />
+              <Bar dataKey="income" name="Income" fill="var(--green)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expense" name="Expense" fill="var(--seal)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

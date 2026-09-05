@@ -11,8 +11,8 @@ export default defineConfig({
         name: "Bahi — ur personal CA",
         short_name: "Bahi",
         description: "AI-assisted bookkeeping for Indian freelancers and small businesses.",
-        theme_color: "#1C2541",
-        background_color: "#FAF6EF",
+        theme_color: "#181C2E",
+        background_color: "#F5EFE1",
         display: "standalone",
         icons: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
