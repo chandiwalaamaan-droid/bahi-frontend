@@ -400,8 +400,13 @@ table{width:100%;border-collapse:collapse;font-size:14px;}
   }
   .bahi .side::after{display:none;}
   .bahi .side.open{display:flex;}
-  .bahi .brand{border-bottom:1px solid var(--rule);padding:18px 20px;margin-bottom:8px;flex-shrink:0;}
-  .bahi nav{flex-direction:column;flex-wrap:nowrap;margin-top:0;padding:0 12px;gap:2px;}
+  /* The sticky top bar already shows the logo + name + close button, so
+     repeating the full brand block (logo, name, tagline) at the top of the
+     off-canvas panel is both redundant and physically sits underneath the
+     sticky bar, which is why the first lines were getting clipped. Drop it
+     on mobile and let nav start clean instead. */
+  .bahi .side .brand{display:none;}
+  .bahi nav{flex-direction:column;flex-wrap:nowrap;margin-top:14px;padding:0 12px;gap:2px;}
   .bahi nav button{width:100%;padding:13px 14px;font-size:15px;}
   .bahi nav button.active::before{left:-12px;}
   .bahi .side .helpbtn{margin:10px 12px 0 12px;width:auto;}
