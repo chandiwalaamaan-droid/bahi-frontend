@@ -3,8 +3,17 @@ export const CSS = `
 :root{
   --ink:#1C2541; --paper:#FAF6EF; --card:#FFFFFF; --primary:#3454D1; --primary-dk:#2A42AC;
   --seal:#B3323F; --brass:#C08A2E; --green:#256D45; --slate:#64707D; --rule:#E7E0D2;
+  --field-bg:#FFFFFF; --overlay-bg:rgba(28,37,65,0.45);
   --shadow-sm: 0 1px 2px rgba(28,37,65,0.05);
   --shadow-md: 0 6px 20px rgba(28,37,65,0.08);
+}
+/* ---------- Dark mode ---------- */
+html.dark{
+  --ink:#F0EDE6; --paper:#0F1014; --card:#1A1B22; --primary:#4A63D9; --primary-dk:#5C73E8;
+  --seal:#D14A55; --brass:#E5B840; --green:#3BB06B; --slate:#A0A9B8; --rule:#2C2D35;
+  --field-bg:#1F2027; --overlay-bg:rgba(0,0,0,0.55);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.15);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.30);
 }
 *{box-sizing:border-box;}
 .bahi{font-family:'IBM Plex Sans',sans-serif;color:var(--ink);background:var(--paper);
@@ -68,7 +77,7 @@ table{width:100%;border-collapse:collapse;font-size:14px;}
 .bahi .btn.xs{padding:4px 10px;font-size:11px;}
 
 .bahi input,.bahi select,.bahi textarea{font-family:'IBM Plex Sans',sans-serif;font-size:14px;
-  border:1px solid var(--rule);border-radius:9px;background:#fff;padding:9px 11px;color:var(--ink);}
+  border:1px solid var(--rule);border-radius:9px;background:var(--field-bg);padding:9px 11px;color:var(--ink);}
 .bahi input:focus,.bahi select:focus,.bahi textarea:focus{outline:2px solid var(--primary);outline-offset:1px;
   border-color:var(--primary);}
 .bahi label{font-size:12.5px;color:var(--slate);display:flex;align-items:center;gap:5px;margin-bottom:4px;}
@@ -179,9 +188,47 @@ table{width:100%;border-collapse:collapse;font-size:14px;}
 .bahi .note-badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;
   background:rgba(192,138,46,0.12);color:var(--brass);margin-left:6px;}
 
+/* ---------- Sidebar extras (dark toggle, notifications) ---------- */
+.bahi .side .themebtn{margin:0 12px 14px 12px;}
+.bahi .side .themebtn button{all:unset;box-sizing:border-box;cursor:pointer;padding:10px 12px;border-radius:10px;
+  font-size:14px;color:var(--slate);display:flex;align-items:center;gap:11px;width:100%;border:1px dashed var(--rule);}
+.bahi .side .themebtn button:hover{color:var(--primary);border-color:var(--primary);background:rgba(52,84,209,0.05);}
+.bahi .side .themebtn .navicon{width:18px;height:18px;}
+
+.bahi .notif-wrap{position:relative;display:inline-block;}
+.bahi .notif-bell{width:34px;height:34px;border-radius:10px;background:rgba(52,84,209,0.07);
+  display:flex;align-items:center;justify-content:center;color:var(--slate);cursor:pointer;
+  transition:background 0.15s, color 0.15s;}
+.bahi .notif-bell:hover{background:rgba(52,84,209,0.12);color:var(--primary);}
+.bahi .notif-bell.has-unread{color:var(--primary);position:relative;}
+.bahi .notif-bell.has-unread::after{content:"";position:absolute;top:6px;right:6px;
+  width:7px;height:7px;border-radius:50%;background:var(--seal);}
+.bahi .notif-dropdown{position:absolute;top:44px;right:0;width:320px;max-height:420px;
+  background:var(--card);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow-md);
+  overflow-y:auto;z-index:50;display:none;}
+.bahi .notif-wrap.open .notif-dropdown{display:block;}
+.bahi .notif-item{padding:10px 12px;border-bottom:1px solid var(--rule);font-size:13px;cursor:pointer;
+  transition:background 0.15s;}
+.bahi .notif-item:hover{background:rgba(52,84,209,0.04);}
+.bahi .notif-item.unread{background:rgba(52,84,209,0.05);}
+.bahi .notif-item .notif-msg{color:var(--ink);margin-bottom:2px;line-height:1.4;}
+.bahi .notif-item .notif-time{color:var(--slate);font-size:11.5px;}
+.bahi .notif-empty{padding:16px;text-align:center;color:var(--slate);font-size:13px;}
+
+/* ---------- Reports page ---------- */
+.bahi .report-card{border:1px solid var(--rule);border-radius:14px;padding:22px;margin-bottom:22px;
+  background:var(--card);box-shadow:var(--shadow-sm);}
+.bahi .report-card h3{font-size:16;margin-bottom:14;}
+.bahi .report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.bahi .report-stat{border:1px solid var(--rule);border-radius:12px;padding:14px;background:var(--paper);
+  text-align:center;}
+.bahi .report-stat .val{font-family:'Source Serif 4',serif;font-size:22px;}
+.bahi .report-stat .lbl{font-size:11.5px;color:var(--slate);margin-top:2px;}
+.bahi .pill.neutral{background:rgba(100,112,125,0.1);color:var(--slate);}
+
 /* ---------- Guide modal ---------- */
-.bahi .guide-overlay{position:fixed;inset:0;background:rgba(28,37,65,0.45);display:flex;align-items:center;
-  justify-content:center;padding:20px;z-index:100;}
+  .bahi .guide-overlay{position:fixed;inset:0;background:var(--overlay-bg);display:flex;align-items:center;
+   justify-content:center;padding:20px;z-index:100;}
 .bahi .guide-modal{width:100%;max-width:620px;max-height:85vh;overflow-y:auto;background:var(--card);
   border-radius:18px;box-shadow:var(--shadow-md);padding:30px 32px;}
 .bahi .guide-modal h2{font-size:23px;}
@@ -209,8 +256,10 @@ table{width:100%;border-collapse:collapse;font-size:14px;}
   .bahi .brand{border-bottom:none;padding:0 16px;margin-bottom:0;flex-shrink:0;}
   .bahi nav{flex-direction:row;flex-wrap:wrap;margin-top:0;padding:0 8px;gap:4px;}
   .bahi nav button{padding:8px 11px;font-size:12.5px;}
-  .bahi .side .helpbtn{margin:0 8px;width:auto;}
-  .bahi .side .helpbtn button{width:auto;padding:8px 11px;}
+   .bahi .side .helpbtn{margin:0 8px;width:auto;}
+   .bahi .side .helpbtn button{width:auto;padding:8px 11px;}
+   .bahi .side .themebtn{margin:0 8px;width:auto;}
+   .bahi .side .themebtn button{width:auto;padding:8px 11px;font-size:12.5px;}
   .bahi .side .logout{margin-top:0;border-top:none;padding:0 16px;margin-left:auto;}
   .bahi .main{padding:20px 16px;max-width:100%;}
   .bahi .grid2{grid-template-columns:1fr;gap:4px;}

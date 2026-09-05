@@ -1,8 +1,50 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: "autoUpdate",
+      manifest: {
+        name: "Bahi — ur personal CA",
+        short_name: "Bahi",
+        description: "AI-assisted bookkeeping for Indian freelancers and small businesses.",
+        theme_color: "#1C2541",
+        background_color: "#FAF6EF",
+        display: "standalone",
+        icons: [
+          { src: "/favicon.png", sizes: "192x192", type: "image/png" },
+          { src: "/apple-touch-icon.png", sizes: "192x192", type: "image/png" },
+        ],
+      },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "bahi-api",
+              expiration: { maxEntries: 200, maxAgeSeconds: 300 },
+              networkTimeoutSeconds: 10,
+            },
+          },
+          {
+            urlPattern: ({ request }) => request.destination === "image",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "bahi-images",
+              expiration: { maxEntries: 100, maxAgeSeconds: 86400 * 30 },
+            },
+          },
+        ],
+      },
+      devOptions: { enabled: false },
+      injectRegister: "auto",
+    }),
+  ],
   server: {
     proxy: {
       "/api": {

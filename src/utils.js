@@ -111,6 +111,24 @@ export function computeOldRegime(gross, salaried, age, deductions80c, deductions
 // ---------- API ----------
 const API = import.meta.env.VITE_API_URL || "";
 export const TOKEN_KEY = "bahi_token";
+export const DARK_MODE_KEY = "bahi_dark_mode";
+
+// ---------- Dark mode ----------
+export function getDarkMode() {
+  const saved = localStorage.getItem(DARK_MODE_KEY);
+  if (saved !== null) return saved === "true";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+export function applyDarkMode(dark) {
+  if (dark) {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem(DARK_MODE_KEY, "true");
+  } else {
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem(DARK_MODE_KEY, "false");
+  }
+}
 
 let onUnauthorized = () => {};
 export function setUnauthorizedHandler(fn) {

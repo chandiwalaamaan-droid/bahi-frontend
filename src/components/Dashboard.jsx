@@ -93,13 +93,13 @@ export default function Dashboard({ txns, invoices }) {
           <h3 style={{ marginBottom: 14, fontSize: 16 }}>Income vs expenses, last 6 months</h3>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={chartData}>
-              <CartesianGrid stroke="#D8D3C7" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#5B6470" }} axisLine={{ stroke: "#D8D3C7" }} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: "#5B6470" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v / 1000}k`} />
-              <Tooltip formatter={(v) => fmtR(v)} contentStyle={{ fontSize: 13, border: "1px solid #D8D3C7" }} />
+              <CartesianGrid stroke="var(--rule)" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 12, fill: "var(--slate)" }} axisLine={{ stroke: "var(--rule)" }} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: "var(--slate)" }} axisLine={{ stroke: "var(--rule)" }} tickLine={false} tickFormatter={(v) => `${v / 1000}k`} />
+              <Tooltip formatter={(v) => fmtR(v)} contentStyle={{ fontSize: 13, border: "1px solid var(--rule)" }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="income" name="Income" fill="#2F5233" />
-              <Bar dataKey="expense" name="Expense" fill="#7A2331" />
+              <Bar dataKey="income" name="Income" fill="var(--green)" />
+              <Bar dataKey="expense" name="Expense" fill="var(--seal)" />
             </BarChart>
           </ResponsiveContainer>
         </div>

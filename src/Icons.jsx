@@ -70,6 +70,33 @@ export const IconHelp = (props) => (
   </svg>
 );
 
+export const IconTheme = ({ dark }) => (
+  <svg viewBox="0 0 24 24" width={18} height={18} style={{ flexShrink: 0 }} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    {dark ? (
+      <path d="M21 12.79A9 9 0 0 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor" />
+    ) : (
+      <>
+        <circle cx="12" cy="12" r="5" />
+        <path d="M12 1v6m0 10v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6m10-9.78L15.54 4.22" />
+      </>
+    )}
+  </svg>
+);
+
+export const IconBell = (props) => (
+  <svg {...base} {...props} viewBox="0 0 24 24" width={18} height={18} style={{ flexShrink: 0 }}>
+    <path d="M12 22a2 2 0 0 0 2-2H9a2 2 0 0 0 2 2Z" />
+    <path d="M18 8A6 6 0 0 0 6 8c0 4.97-3 5.93-3 5.93h18S21 12.97 21 8Z" />
+  </svg>
+);
+
+export const IconReport = (props) => (
+  <svg {...base} {...props} viewBox="0 0 24 24">
+    <path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" />
+    <path d="M8 9h8M8 13h4" />
+  </svg>
+);
+
 export const NAV_ICONS = {
   dashboard: IconDashboard,
   transactions: IconTransactions,
@@ -78,4 +105,5 @@ export const NAV_ICONS = {
   gst: IconPercent,
   advisor: IconAdvisor,
   settings: IconBuilding,
+  reports: IconReport,
 };

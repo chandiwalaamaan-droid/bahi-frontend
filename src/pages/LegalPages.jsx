@@ -25,7 +25,7 @@ const TERMS_SECTIONS = [
   {
     h: "2. What Bahi is — and isn't",
     p: [
-      "Bahi is a bookkeeping and invoicing tool aimed at freelancers, students, and small businesses in India. It includes transaction and invoice tracking, an income-tax and GST calculator, and an AI Advisor that can answer questions in plain language.",
+      "Bahi is a bookkeeping and invoicing tool aimed at freelancers, students, and small businesses in India. It includes transaction and invoice tracking, recurring invoices, financial reports (profit & loss, cash flow, GST summary, and trends), an income-tax and GST calculator, and an AI Advisor that can answer questions in plain language.",
       "Bahi is not a chartered accountant, tax advisor, or law firm, and nothing in the app — including the AI Advisor, the Dashboard's estimated tax liability, or the Tax/GST calculators — is professional financial, tax, accounting, or legal advice. These are simplified planning tools. Always confirm anything consequential (filings, large transactions, notices from a tax authority) with a qualified Chartered Accountant before acting on it.",
     ],
   },

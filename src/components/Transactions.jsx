@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { apiPost, apiPut, apiDelete, fmtR, uid, todayISO, downloadCSV } from "../utils";
 import { CATEGORIES } from "../constants";
+import { Help } from "./Guide";
 
 export default function Transactions({ txns, setTxns, setError }) {
   const [form, setForm] = useState({ date: todayISO(), type: "expense", category: CATEGORIES.expense[0], amount: "", note: "" });
@@ -10,6 +11,7 @@ export default function Transactions({ txns, setTxns, setError }) {
   const [busy, setBusy] = useState(false);
   const [quickText, setQuickText] = useState("");
   const [quickBusy, setQuickBusy] = useState(false);
+  const [suggestBusy, setSuggestBusy] = useState(false);
 
   const quickAdd = async () => {
     const text = quickText.trim();
@@ -27,10 +29,24 @@ export default function Transactions({ txns, setTxns, setError }) {
     }
   };
 
+  const suggestCategory = async () => {
+    const text = form.note.trim();
+    if (!text) return;
+    setSuggestBusy(true);
+    try {
+      const result = await apiPost("/transactions/categorize", { text });
+      setForm((prev) => ({ ...prev, type: result.type, category: result.category }));
+    } catch (e) {
+      alert(e.message || "Could not suggest a category.");
+    } finally {
+      setSuggestBusy(false);
+    }
+  };
+
   const add = async () => {
     const amt = parseFloat(form.amount);
     if (!amt || amt <= 0) return;
-    const entry = { id: uid(), ...form, amount: amt };
+    const entry = { id: uid(), ...form, amount: amt, gst_amount: parseFloat(form.gst_amount) || 0 };
     setBusy(true);
     setError("");
     try {
@@ -47,7 +63,7 @@ export default function Transactions({ txns, setTxns, setError }) {
   const startEdit = (t) => {
     setConfirmingId(null);
     setEditingId(t.id);
-    setEditForm({ date: t.date, type: t.type, category: t.category, amount: String(t.amount), note: t.note || "" });
+    setEditForm({ date: t.date, type: t.type, category: t.category, amount: String(t.amount), note: t.note || "", gst_amount: String(t.gst_amount || "") });
   };
   const cancelEdit = () => { setEditingId(null); setEditForm(null); };
   const saveEdit = async (id) => {
@@ -81,7 +97,7 @@ export default function Transactions({ txns, setTxns, setError }) {
     downloadCSV(
       `bahi-transactions-${todayISO()}.csv`,
       sorted,
-      ["date", "type", "category", "amount", "note"]
+      ["date", "type", "category", "amount", "gst_amount", "note"]
     );
   };
 
@@ -146,8 +162,23 @@ export default function Transactions({ txns, setTxns, setError }) {
         </div>
         <div className="field">
           <label>Note (optional)</label>
-          <input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} style={{ width: "100%" }} />
+          <div style={{ display: "flex", gap: 8 }}>
+            <input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} style={{ flex: 1 }} />
+            <button className="btn ghost sm" onClick={suggestCategory} disabled={suggestBusy || !form.note.trim()}>
+              {suggestBusy ? "…" : "Suggest"}
+            </button>
+          </div>
+          <p className="hint">Click "Suggest" to auto-pick a category from your note text (works without AI).</p>
         </div>
+        {form.type === "expense" && (
+          <div className="field">
+            <label>
+              GST paid (₹)
+                <Help text="The GST portion of this expense — used in the GST report to calculate your input tax credit. Only relevant if you're GST-registered." />
+            </label>
+            <input type="number" value={form.gst_amount || ""} onChange={(e) => setForm({ ...form, gst_amount: e.target.value })} style={{ width: "100%" }} placeholder="e.g. 900" />
+          </div>
+        )}
         <button className="btn" onClick={add} disabled={busy}>{busy ? "Saving…" : "Add entry"}</button>
       </div>
 

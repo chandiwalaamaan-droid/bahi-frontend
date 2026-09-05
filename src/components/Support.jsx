@@ -8,11 +8,23 @@ const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL;
 const FAQS = [
   {
     q: "Is Bahi free to use?",
-    a: "Yes. There's no paid plan, subscription, or usage limit — every feature (Transactions, Invoices, calculators, Business Profile) is free.",
+    a: "Yes. There's no paid plan, subscription, or usage limit — every feature (Transactions, Invoices, recurring invoices, Reports, calculators, Business Profile, dark mode, and offline app support) is free.",
   },
   {
     q: "Is the AI Advisor a real chartered accountant?",
     a: "No. It's an AI assistant that can help explain GST and income tax concepts and look at your own numbers, but it isn't a licensed CA and can make mistakes. Confirm anything consequential — filings, large transactions, notices from the tax department — with a qualified CA before acting on it.",
+  },
+  {
+    q: "How do recurring invoices work?",
+    a: "Set up a template in the Invoices tab with your client, line items, and a frequency (monthly, quarterly, or yearly). The app automatically generates a real invoice on each scheduled date, assigns it the next invoice number, and notifies you. You can pause, edit, or delete the template anytime.",
+  },
+  {
+    q: "How do I get reminded about unpaid invoices?",
+    a: "When an invoice's due date passes and it's still unpaid, Bahi creates an in-app notification for you. The bell icon in the sidebar turns red with the count. You can also enable browser notifications by installing the app as a PWA.",
+  },
+  {
+    q: "What does the GST report show?",
+    a: "It groups your invoices' GST by rate (e.g. 5%, 12%, 18%) to show output tax collected, subtracts any GST you recorded as input tax on expense entries, and shows your net GST payable. If you don't enter GST on expenses, only output tax is shown.",
   },
   {
     q: "How accurate is the \"Est. tax liability\" on the Dashboard?",
@@ -20,7 +32,11 @@ const FAQS = [
   },
   {
     q: "Can I get my data out if I want to hand it to a real CA?",
-    a: "Yes — open Transactions and use \"Export CSV\" to download every logged entry as a spreadsheet file you can share or import elsewhere.",
+    a: "Yes — open Transactions and use \"Export CSV\" to download every logged entry as a spreadsheet file you can share or import elsewhere. You can also use the Reports tab to see P&L, cash flow, and GST summaries.",
+  },
+  {
+    q: "Can I use Bahi offline or on my phone?",
+    a: "Yes — Bahi is a Progressive Web App. On mobile, you'll see an \"Add to Home screen\" prompt; on desktop, install it from your browser. Once loaded, your data and the app interface work offline (you'll need a connection for the AI Advisor and live reports).",
   },
   {
     q: "Is my data private?",
@@ -28,7 +44,7 @@ const FAQS = [
   },
   {
     q: "Why does the AI Advisor sometimes say it's unavailable?",
-    a: "It relies on an external AI provider. If none are configured on this server, or all of them are temporarily down, you'll see a message explaining which. Every other part of Bahi — Transactions, Invoices, calculators, Business Profile — works independently of the AI Advisor.",
+    a: "It relies on an external AI provider. If none are configured on this server, or all of them are temporarily down, you'll see a message explaining which. Every other part of Bahi — Transactions, Invoices, reports, calculators, Business Profile — works independently of the AI Advisor.",
   },
 ];
 

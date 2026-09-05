@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { apiPost, apiPut, apiDelete, apiGet, apiPatch, fmtR, uid, todayISO } from "../utils";
+import RecurringInvoices from "./RecurringInvoices";
 
 function blankItem() {
   return { id: uid(), desc: "", qty: 1, rate: "", gst: 18 };
@@ -399,6 +400,8 @@ export default function Invoices({ invoices, setInvoices, setError, profile }) {
           </div>
         )}
       </div>
+
+      <RecurringInvoices setError={setError} />
     </div>
   );
 }

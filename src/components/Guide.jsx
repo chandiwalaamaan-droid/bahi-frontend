@@ -7,6 +7,7 @@ import {
   IconPercent,
   IconAdvisor,
   IconBuilding,
+  IconReport,
 } from "../Icons";
 
 // Small "?" badge that shows a plain-language explanation on hover/focus/tap.
@@ -29,12 +30,17 @@ const STEPS = [
   {
     icon: IconTransactions,
     title: "Transactions",
-    body: "Log every rupee in or out — a client payment, rent, a software subscription. This is the raw diary everything else is built from.",
+    body: "Log every rupee in or out — a client payment, rent, a software subscription. Use Quick Add to describe an entry in plain English, or click \"Suggest\" to auto-pick a category from your note text.",
   },
   {
     icon: IconInvoice,
     title: "Invoices",
-    body: "Create a bill to send a client, mark it paid once they pay you, and issue a credit or debit note if you need to correct one later.",
+    body: "Create a bill to send a client, mark it paid once they pay you, and issue a credit or debit note if you need to correct one later. Set up recurring invoices to auto-generate at monthly, quarterly, or yearly intervals.",
+  },
+  {
+    icon: IconReport,
+    title: "Reports",
+    body: "Your finances at a glance — a Profit & Loss summary, cash flow trends, a GST summary (output tax minus input tax), and month-by-month charts.",
   },
   {
     icon: IconCalculator,
@@ -54,7 +60,7 @@ const STEPS = [
   {
     icon: IconBuilding,
     title: "Business Profile",
-    body: "Your business name, address, and tax IDs — filled in here once, then used automatically on every invoice you create.",
+    body: "Your business name, address, and tax IDs — filled in here once, then used automatically on every invoice you create. Toggle dark mode and check for notifications from the sidebar.",
   },
 ];
 

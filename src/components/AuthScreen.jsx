@@ -187,7 +187,7 @@ export default function AuthScreen({ onAuthed }) {
             <img src="/logo.png" alt="" width={30} height={30} style={{ borderRadius: 7 }} />
             Bahi
           </div>
-          <div className="tag">Clarity you can trust — CA-level insight, powered by AI. Free to use.</div>
+          <div className="tag">ur personal CA — AI-assisted bookkeeping, free to use.</div>
 
           {(mode === "login" || mode === "register") && GOOGLE_CLIENT_ID && (
             <div style={{ marginBottom: 16 }}>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import { CSS } from "./styles";
-import { setUnauthorizedHandler, TOKEN_KEY, apiGet } from "./utils";
+import { setUnauthorizedHandler, TOKEN_KEY, apiGet, apiPost, getDarkMode, applyDarkMode } from "./utils";
 import { TABS } from "./constants";
-import { NAV_ICONS, IconHelp } from "./Icons";
+import { NAV_ICONS, IconHelp, IconTheme, IconBell } from "./Icons";
 import AuthScreen from "./components/AuthScreen";
 import Transactions from "./components/Transactions";
 import TaxCalculator from "./components/TaxCalculator";
@@ -16,6 +16,7 @@ import Support from "./components/Support";
 const Dashboard = lazy(() => import("./components/Dashboard"));
 const Advisor = lazy(() => import("./components/Advisor"));
 const Invoices = lazy(() => import("./components/Invoices"));
+const Reports = lazy(() => import("./components/Reports"));
 
 const TabFallback = () => <p className="empty">Loading…</p>;
 
@@ -33,6 +34,10 @@ export default function App() {
   const [chat, setChat] = useState([]);
   const [profile, setProfile] = useState({ business_name: "", gstin: "", pan: "", address: "", phone: "", email: "" });
   const [error, setError] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
@@ -76,6 +81,66 @@ export default function App() {
   const closeGuide = useCallback(() => setShowGuide(false), []);
 
   useEffect(() => {
+    const initial = getDarkMode();
+    setDarkMode(initial);
+    applyDarkMode(initial);
+
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const toggleDarkMode = useCallback(() => {
+    const next = !darkMode;
+    setDarkMode(next);
+    applyDarkMode(next);
+  }, [darkMode]);
+
+  const loadNotifications = useCallback(async () => {
+    if (!user) return;
+    try {
+      const rows = await apiGet("/notifications");
+      setNotifications(rows);
+    } catch {
+      // ignore — notifications are non-critical
+    }
+  }, [user]);
+
+  const markAllRead = useCallback(async () => {
+    try {
+      await apiPost("/notifications/read", {});
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const markNotifRead = useCallback(async (id) => {
+    try {
+      await apiPost(`/notifications/${id}/read`, {});
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const openNotif = useCallback((n) => {
+    if (!n.isRead) markNotifRead(n.id);
+    if (n.link?.startsWith("/invoices")) setTab("invoices");
+    setNotifOpen(false);
+  }, [markNotifRead]);
+
+  useEffect(() => {
+    if (!user) return;
+    loadNotifications();
+    const id = setInterval(loadNotifications, 30000);
+    return () => clearInterval(id);
+  }, [user, loadNotifications]);
+
+  useEffect(() => {
     if (!user) return;
     (async () => {
       setLoaded(false);
@@ -100,6 +165,14 @@ export default function App() {
     })();
   }, [user]);
 
+  useEffect(() => {
+    const close = (e) => {
+      if (!e.target.closest(".notif-wrap")) setNotifOpen(false);
+    };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
+
   if (checkingSession) {
     return (
       <div className="bahi">
@@ -123,8 +196,8 @@ export default function App() {
               <img src="/logo.png" alt="" width={26} height={26} style={{ borderRadius: 6 }} />
               Bahi
             </div>
-            <div className="tag">AI-assisted bookkeeping — not a licensed CA</div>
-            <div className="tag" style={{ marginTop: 2 }}>Free to use</div>
+            <div className="tag">ur personal CA</div>
+            <div className="tag" style={{ marginTop: 2 }}>AI-assisted bookkeeping · Free to use</div>
           </div>
           <nav>
             {TABS.map((t) => {
@@ -137,6 +210,61 @@ export default function App() {
               );
             })}
           </nav>
+          <div className="themebtn">
+            <button onClick={toggleDarkMode} aria-label="Toggle dark mode">
+              <IconTheme dark={darkMode} className="navicon" />
+              {darkMode ? "Light mode" : "Dark mode"}
+            </button>
+          </div>
+          {deferredPrompt && (
+            <div className="helpbtn">
+              <button
+                onClick={async () => {
+                  deferredPrompt.prompt();
+                  const choice = await deferredPrompt.userChoice;
+                  setDeferredPrompt(null);
+                }}
+                aria-label="Install Bahi"
+              >
+                <IconBell className="navicon" />
+                Install app
+              </button>
+            </div>
+          )}
+          <div className="helpbtn" style={{ position: "relative" }}>
+            <button
+              onClick={(e) => { e.stopPropagation(); setNotifOpen(!notifOpen); }}
+              aria-label="Notifications"
+              className="notif-wrap"
+            >
+              <span className={`notif-bell ${notifications.some((n) => !n.isRead) ? "has-unread" : ""}`} onClick={(e) => e.stopPropagation()}>
+                <IconBell className="navicon" />
+              </span>
+              {notifOpen && (
+                <div className="notif-dropdown">
+                  {notifications.length === 0 ? (
+                    <div className="notif-empty">No notifications yet.</div>
+                  ) : (
+                    notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className={`notif-item ${!n.isRead ? "unread" : ""}`}
+                        onClick={() => openNotif(n)}
+                      >
+                        <div className="notif-msg">{n.message}</div>
+                        <div className="notif-time">{new Date(n.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</div>
+                      </div>
+                    ))
+                  )}
+                  {notifications.some((n) => !n.isRead) && (
+                    <div style={{ padding: "8px 12px", textAlign: "center", borderTop: "1px solid var(--rule)" }}>
+                      <button className="btn ghost sm" onClick={(e) => { e.stopPropagation(); markAllRead(); }}>Mark all read</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </button>
+          </div>
           <div className="helpbtn">
             <button onClick={() => setShowGuide(true)}>
               <IconHelp className="navicon" />
@@ -166,13 +294,14 @@ export default function App() {
           ) : (
             <Suspense fallback={<TabFallback />}>
               {tab === "dashboard" && <Dashboard txns={txns} invoices={invoices} />}
-              {tab === "transactions" && <Transactions txns={txns} setTxns={setTxns} setError={setError} />}
-              {tab === "invoices" && <Invoices invoices={invoices} setInvoices={setInvoices} setError={setError} profile={profile} />}
-              {tab === "tax" && <TaxCalculator />}
-              {tab === "gst" && <GstCalculator />}
-              {tab === "advisor" && <Advisor chat={chat} setChat={setChat} />}
-              {tab === "settings" && <BusinessProfile profile={profile} setProfile={setProfile} setError={setError} />}
-            </Suspense>
+                {tab === "transactions" && <Transactions txns={txns} setTxns={setTxns} setError={setError} />}
+                {tab === "invoices" && <Invoices invoices={invoices} setInvoices={setInvoices} setError={setError} profile={profile} />}
+                {tab === "reports" && <Reports txns={txns} invoices={invoices} />}
+                {tab === "tax" && <TaxCalculator />}
+                {tab === "gst" && <GstCalculator />}
+                {tab === "advisor" && <Advisor chat={chat} setChat={setChat} />}
+                {tab === "settings" && <BusinessProfile profile={profile} setProfile={setProfile} setError={setError} />}
+              </Suspense>
           )}
         </main>
       </div>
