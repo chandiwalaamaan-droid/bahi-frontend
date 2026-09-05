@@ -237,9 +237,10 @@ export default function App() {
               aria-label="Notifications"
               className="notif-wrap"
             >
-              <span className={`notif-bell ${notifications.some((n) => !n.isRead) ? "has-unread" : ""}`} onClick={(e) => e.stopPropagation()}>
+              <span className={`notif-bell ${notifications.some((n) => !n.isRead) ? "has-unread" : ""}`}>
                 <IconBell className="navicon" />
               </span>
+              Notifications
               {notifOpen && (
                 <div className="notif-dropdown">
                   {notifications.length === 0 ? (
