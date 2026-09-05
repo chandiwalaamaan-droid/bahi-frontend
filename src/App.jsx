@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import { CSS } from "./styles";
-import { setUnauthorizedHandler, TOKEN_KEY, apiGet, apiPost, getDarkMode, applyDarkMode } from "./utils";
+import { setUnauthorizedHandler, TOKEN_KEY, apiGet, apiPost, getDarkMode, applyDarkMode, isIos, isStandalone } from "./utils";
 import { TABS } from "./constants";
-import { NAV_ICONS, IconHelp, IconTheme, IconBell } from "./Icons";
+import { NAV_ICONS, IconHelp, IconTheme, IconBell, IconDownload } from "./Icons";
 import AuthScreen from "./components/AuthScreen";
 import Transactions from "./components/Transactions";
 import TaxCalculator from "./components/TaxCalculator";
@@ -38,6 +38,8 @@ export default function App() {
   const [notifications, setNotifications] = useState([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showIosHint, setShowIosHint] = useState(false);
+  const [appInstalled, setAppInstalled] = useState(false);
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
@@ -85,12 +87,22 @@ export default function App() {
     setDarkMode(initial);
     applyDarkMode(initial);
 
+    setAppInstalled(isStandalone());
+
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
     };
+    const installedHandler = () => {
+      setAppInstalled(true);
+      setDeferredPrompt(null);
+    };
     window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", installedHandler);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", installedHandler);
+    };
   }, []);
 
   const toggleDarkMode = useCallback(() => {
@@ -216,19 +228,36 @@ export default function App() {
               {darkMode ? "Light mode" : "Dark mode"}
             </button>
           </div>
-          {deferredPrompt && (
+          {!appInstalled && (deferredPrompt || isIos()) && (
             <div className="helpbtn">
               <button
                 onClick={async () => {
-                  deferredPrompt.prompt();
-                  const choice = await deferredPrompt.userChoice;
-                  setDeferredPrompt(null);
+                  if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const choice = await deferredPrompt.userChoice;
+                    if (choice.outcome === "accepted") setAppInstalled(true);
+                    setDeferredPrompt(null);
+                  } else {
+                    // iOS has no programmatic install prompt — only the
+                    // manual Share -> Add to Home Screen flow.
+                    setShowIosHint((s) => !s);
+                  }
                 }}
                 aria-label="Install Bahi"
               >
-                <IconBell className="navicon" />
+                <IconDownload className="navicon" />
                 Install app
               </button>
+              {showIosHint && !deferredPrompt && (
+                <div style={{
+                  margin: "6px 0 0 0", padding: "10px 12px", borderRadius: 10,
+                  fontSize: 13, color: "var(--slate)", border: "1px dashed var(--rule)",
+                  lineHeight: 1.5,
+                }}>
+                  Tap <strong style={{ color: "var(--ink)" }}>Share</strong> in Safari's toolbar, then{" "}
+                  <strong style={{ color: "var(--ink)" }}>Add to Home Screen</strong>.
+                </div>
+              )}
             </div>
           )}
           <div className="helpbtn" style={{ position: "relative" }}>

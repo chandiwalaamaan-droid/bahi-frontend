@@ -10,6 +10,24 @@ export const monthLabel = (key) => {
   return new Date(y, m - 1, 1).toLocaleString("en-IN", { month: "short", year: "2-digit" });
 };
 
+// True once the app is already running installed (Android/desktop "standalone"
+// display mode, or iOS Safari's own `navigator.standalone` flag) — used to
+// hide the "Install app" row so it doesn't show up inside the installed app.
+export function isStandalone() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
+// iOS Safari never fires `beforeinstallprompt` — there's no programmatic
+// install there, only the manual Share -> Add to Home Screen flow — so the
+// install button falls back to showing instructions instead of a real prompt.
+export function isIos() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+
 // Turns an array of same-shaped row objects into a downloadable CSV file,
 // e.g. downloadCSV("transactions.csv", txns, ["date","type","category","amount","note"]).
 // Handles quoting for commas/quotes/newlines so a note like `Client said "thanks"`
