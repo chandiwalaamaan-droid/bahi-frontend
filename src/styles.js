@@ -10,6 +10,17 @@ export const CSS = `
   --shadow-lg: 0 24px 56px rgba(24,26,40,0.16);
   --ring: rgba(59,79,224,0.18);
 }
+
+/* The app is rendered inside <div id="root"> with no other global stylesheet,
+   so the browser's default ~8px body margin (and white background) was never
+   reset. That's the persistent white edge around the app in every screenshot,
+   in both themes, since dark mode only scopes variables to .bahi and never
+   touched body itself. */
+html, body, #root{
+  margin:0; padding:0;
+  width:100%; min-height:100%;
+}
+body{ background:var(--paper); }
 /* ---------- Dark mode ---------- */
 html.dark{
   --ink:#ECE6D6; --paper:#0A0B12; --card:#161826; --primary:#6E80FF; --primary-dk:#8798FF;
