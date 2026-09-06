@@ -495,9 +495,9 @@ table{width:100%;border-collapse:collapse;font-size:14px;}
   background:linear-gradient(90deg, transparent, rgba(192,138,46,0.4), transparent);}
 .bahi .landing-mock-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .bahi .landing-mock-head .mock-title{font-family:'Source Serif 4',serif;font-size:15px;font-weight:600;}
-.bahi .landing-mock .row{gap:10px;margin-bottom:14px;flex-wrap:nowrap;}
-.bahi .landing-mock .stat{min-width:0;padding:12px 13px;border-left-width:3px;}
-.bahi .landing-mock .stat .val{font-size:18px;}
+.bahi .landing-mock .row{gap:10px;margin-bottom:14px;}
+.bahi .landing-mock .stat{min-width:0;padding:12px 13px;border-left-width:3px;flex:1 1 100px;}
+.bahi .landing-mock .stat .val{font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .bahi .landing-mock-list{border-top:1px solid var(--rule);padding-top:10px;}
 .bahi .landing-mock-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;font-size:12.5px;
   border-bottom:1px dashed var(--rule);}
