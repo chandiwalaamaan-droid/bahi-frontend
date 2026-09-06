@@ -24,10 +24,10 @@ const FAQS = [
   },
   {
     q: "What does the GST report show?",
-    a: "It groups your invoices' GST by rate (e.g. 5%, 12%, 18%) to show output tax collected, subtracts any GST you recorded as input tax on expense entries, and shows your net GST payable. If you don't enter GST on expenses, only output tax is shown.",
+    a: "It groups your invoices' GST by rate (e.g. 5%, 12%, 18%) to show output tax collected, subtracts any GST you recorded as input tax on expense entries, and shows your net GST payable. If you don't enter GST on expenses, only output tax is shown. This is a planning summary based on what you've logged, not a GST return or a reconciled input-tax-credit statement — your actual ITC depends on your suppliers' filings too, which Bahi doesn't have visibility into.",
   },
   {
-    q: "How accurate is the \"Est. tax liability\" on the Dashboard?",
+    q: "How accurate is the \"Tax planning estimate\" on the Dashboard?",
     a: "It's a rough, simplified projection — this month's income and expenses scaled to a full year, with a simplified tax calculation. It doesn't account for deductions, other income sources, or exact filing rules. Use the Tax Calculator tab for a more detailed old-vs-new regime comparison, and treat both as planning tools, not filing numbers.",
   },
   {
@@ -36,7 +36,7 @@ const FAQS = [
   },
   {
     q: "Can I use Bahi offline or on my phone?",
-    a: "Yes — Bahi is a Progressive Web App. On mobile, you'll see an \"Add to Home screen\" prompt; on desktop, install it from your browser. Once loaded, your data and the app interface work offline (you'll need a connection for the AI Advisor and live reports).",
+    a: "Yes — Bahi is a Progressive Web App. On mobile, you'll see an \"Add to Home screen\" prompt; on desktop, install it from your browser. Once installed, the app shell can open offline, but it still needs a connection to load or sync your actual transactions, invoices, reports, and the AI Advisor — it isn't an offline-first ledger.",
   },
   {
     q: "Is my data private?",

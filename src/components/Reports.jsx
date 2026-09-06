@@ -277,6 +277,9 @@ export default function Reports({ txns, invoices }) {
               <p style={{ fontSize: 12, color: "var(--slate)", marginTop: 12 }}>
                 Input tax is derived from the optional GST field on your expense transactions. <Help text="When you log an expense that includes GST, enter the GST portion in the 'GST paid (₹)' field on the Transactions form. That amount is tracked as input tax, which reduces your net GST liability." />
               </p>
+              <p style={{ fontSize: 12, color: "var(--slate)", marginTop: 4 }}>
+                GST planning summary based on what you've logged — not a filed GST return or a reconciled input-tax-credit statement.
+              </p>
             </>
           )}
         </div>

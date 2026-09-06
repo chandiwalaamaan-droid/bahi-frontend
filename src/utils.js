@@ -52,6 +52,8 @@ export function downloadCSV(filename, rows, columns) {
   URL.revokeObjectURL(url);
 }
 
+import { TAX_RULES } from "./taxRules";
+
 export function calcSlabTax(income, slabs) {
   let tax = 0;
   for (const [from, to, rate] of slabs) {
@@ -63,67 +65,51 @@ export function calcSlabTax(income, slabs) {
   return Math.max(0, tax);
 }
 
-export const NEW_SLABS = [
-  [0, 400000, 0],
-  [400000, 800000, 0.05],
-  [800000, 1200000, 0.1],
-  [1200000, 1600000, 0.15],
-  [1600000, 2000000, 0.2],
-  [2000000, 2400000, 0.25],
-  [2400000, null, 0.3],
-];
+// Re-exported so existing imports of NEW_SLABS (e.g. Dashboard.jsx) keep
+// working — the actual numbers now live in taxRules.js.
+export const NEW_SLABS = TAX_RULES.newRegime.slabs;
 
 function oldSlabsFor(age) {
-  if (age === "senior") {
-    return [
-      [0, 300000, 0],
-      [300000, 500000, 0.05],
-      [500000, 1000000, 0.2],
-      [1000000, null, 0.3],
-    ];
-  }
-  if (age === "supersenior") {
-    return [
-      [0, 500000, 0],
-      [500000, 1000000, 0.2],
-      [1000000, null, 0.3],
-    ];
-  }
-  return [
-    [0, 250000, 0],
-    [250000, 500000, 0.05],
-    [500000, 1000000, 0.2],
-    [1000000, null, 0.3],
-  ];
+  if (age === "senior") return TAX_RULES.oldRegime.slabsSenior60to80;
+  if (age === "supersenior") return TAX_RULES.oldRegime.slabsSuperSenior80Plus;
+  return TAX_RULES.oldRegime.slabsBelow60;
 }
 
 export function computeNewRegime(gross, salaried) {
-  const stdDed = salaried ? 75000 : 0;
+  const { standardDeductionSalaried, slabs, rebate: rebateRule, cessRate } = TAX_RULES.newRegime;
+  const stdDed = salaried ? standardDeductionSalaried : 0;
   const taxable = Math.max(0, gross - stdDed);
-  let tax = calcSlabTax(taxable, NEW_SLABS);
+  let tax = calcSlabTax(taxable, slabs);
   let rebate = 0;
-  if (taxable <= 1200000) {
-    rebate = Math.min(tax, 60000);
+  if (taxable <= rebateRule.maxTaxableIncome) {
+    rebate = Math.min(tax, rebateRule.maxRebate);
     tax = 0;
   }
-  const cess = tax * 0.04;
+  const cess = tax * cessRate;
   return { stdDed, taxable, taxBeforeCess: tax, rebate, cess, total: tax + cess };
 }
 
 export function computeOldRegime(gross, salaried, age, deductions80c, deductions80d, deductions80ccd, otherDed) {
-  const stdDed = salaried ? 50000 : 0;
-  const cappedC = Math.min(deductions80c || 0, 150000);
-  const cappedD = Math.min(deductions80d || 0, 25000);
-  const cappedCcd = Math.min(deductions80ccd || 0, 50000);
+  const { standardDeductionSalaried, rebate: rebateRule, cessRate, deductionCaps } = TAX_RULES.oldRegime;
+  const stdDed = salaried ? standardDeductionSalaried : 0;
+  // 80D's cap depends on the taxpayer's own age bracket (60+ gets a higher
+  // limit for their own health cover) — previously this was hardcoded to
+  // 25,000 for everyone regardless of the age selected above it in the form,
+  // which silently under-capped senior citizens' deduction.
+  const is60Plus = age === "senior" || age === "supersenior";
+  const cap80D = is60Plus ? deductionCaps.section80D60Plus : deductionCaps.section80DBelow60;
+  const cappedC = Math.min(deductions80c || 0, deductionCaps.section80C);
+  const cappedD = Math.min(deductions80d || 0, cap80D);
+  const cappedCcd = Math.min(deductions80ccd || 0, deductionCaps.section80CCD1B);
   const taxable = Math.max(0, gross - stdDed - cappedC - cappedCcd - cappedD - (otherDed || 0));
   let tax = calcSlabTax(taxable, oldSlabsFor(age));
   let rebate = 0;
-  if (taxable <= 500000) {
-    rebate = Math.min(tax, 12500);
+  if (taxable <= rebateRule.maxTaxableIncome) {
+    rebate = Math.min(tax, rebateRule.maxRebate);
     tax = 0;
   }
-  const cess = tax * 0.04;
-  return { stdDed, cappedC, cappedD, cappedCcd, taxable, taxBeforeCess: tax, rebate, cess, total: tax + cess };
+  const cess = tax * cessRate;
+  return { stdDed, cappedC, cappedD, cap80D, cappedCcd, taxable, taxBeforeCess: tax, rebate, cess, total: tax + cess };
 }
 
 // ---------- API ----------

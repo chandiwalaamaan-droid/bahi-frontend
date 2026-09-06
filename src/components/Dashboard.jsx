@@ -1,6 +1,7 @@
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { fmtR, monthKey, monthLabel, todayISO, calcSlabTax, NEW_SLABS } from "../utils";
+import { TAX_RULES } from "../taxRules";
 import { Help } from "./Guide";
 
 export default function Dashboard({ txns, invoices }) {
@@ -9,10 +10,14 @@ export default function Dashboard({ txns, invoices }) {
   const income = thisMonth.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const expense = thisMonth.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
-  // Outstanding invoices: sum of unpaid invoice grand totals
-  const outstanding = (invoices || [])
-    .filter((i) => i.status === "unpaid")
-    .reduce((s, i) => s + Number(i.grand || 0), 0);
+  // Unpaid invoices, split into "outstanding" (not yet due) and "overdue"
+  // (past their due date) — lumping these together made it impossible to
+  // tell a healthy pipeline from one with actual collection problems.
+  const unpaidInvoices = (invoices || []).filter((i) => i.status === "unpaid");
+  const today = todayISO();
+  const overdueInvoices = unpaidInvoices.filter((i) => i.dueDate && i.dueDate < today);
+  const outstanding = unpaidInvoices.reduce((s, i) => s + Number(i.grand || 0), 0);
+  const overdue = overdueInvoices.reduce((s, i) => s + Number(i.grand || 0), 0);
 
   // Estimated annual tax liability (new regime projection)
   const annualIncome = [...thisMonth.filter((t) => t.type === "income")]
@@ -20,10 +25,16 @@ export default function Dashboard({ txns, invoices }) {
   const annualExpense = [...thisMonth.filter((t) => t.type === "expense")]
     .reduce((s, t) => s + t.amount, 0) * (12 / (new Date().getMonth() + 1));
   const netProfit = Math.max(0, annualIncome - annualExpense);
-  // Rough estimate: 50% presumptive or slab on net profit, whichever is lower
+  // Rough estimate: 50% presumptive or slab on net profit, whichever is lower.
+  // Intentionally NOT the same thing as a filed tax liability — see the
+  // "Tax planning estimate" label and disclaimer below.
   const slabTax = calcSlabTax(annualIncome - annualExpense, NEW_SLABS) * 0.5; // simplified: apply slab to net, 50% presumptive
   const estTax = Math.min(slabTax, netProfit * 0.3);
-  const monthlyProgress = Math.min(100, ((new Date().getDate() / 30) * 100));
+  // Profit margin this month — how much of what came in is actually left
+  // over, which tells a business owner something useful. The previous
+  // "Monthly progress" metric was just (day-of-month / 30): it measured the
+  // calendar, not the business, no matter what it was labeled.
+  const profitMargin = income > 0 ? ((income - expense) / income) * 100 : null;
 
   const byMonth = {};
   txns.forEach((t) => {
@@ -60,8 +71,19 @@ export default function Dashboard({ txns, invoices }) {
           </div>
         </div>
         <div className="stat warn">
-          <div className="lbl">Outstanding receivables</div>
+          <div className="lbl">
+            Outstanding receivables
+            <Help text="All unpaid invoices, whether or not their due date has passed yet." />
+          </div>
           <div className="val">{fmtR(outstanding)}</div>
+        </div>
+        <div className="stat neg">
+          <div className="lbl">
+            Overdue
+            <Help text="Unpaid invoices whose due date has already passed — these need chasing." />
+          </div>
+          <div className="val">{fmtR(overdue)}</div>
+          {overdueInvoices.length > 0 && <div className="hint">{overdueInvoices.length} invoice{overdueInvoices.length === 1 ? "" : "s"}</div>}
         </div>
       </div>
 
@@ -76,15 +98,18 @@ export default function Dashboard({ txns, invoices }) {
         </div>
         <div className="stat warn">
           <div className="lbl">
-            Est. tax liability (FY 2025–26)
+            Tax planning estimate ({TAX_RULES.financialYear})
             <Help text="A rough, simplified projection based on this month's numbers scaled to a full year — not a real tax calculation. It doesn't account for deductions, other income, or exact filing rules. Use the Tax Calculator tab for a proper estimate, and confirm with a CA before filing." />
           </div>
           <div className="val">{fmtR(estTax)}</div>
-          <div className="hint">Rough estimate, not tax advice</div>
+          <div className="hint">Planning estimate, not a filing calculation</div>
         </div>
         <div className="stat">
-          <div className="lbl">Monthly progress</div>
-          <div className="val">{Math.round(monthlyProgress)}%</div>
+          <div className="lbl">
+            Profit margin this month
+            <Help text="What share of this month's income is left after expenses — (income − expenses) ÷ income." />
+          </div>
+          <div className="val">{profitMargin === null ? "—" : `${Math.round(profitMargin)}%`}</div>
         </div>
       </div>
 

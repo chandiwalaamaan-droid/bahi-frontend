@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { fmtR, computeNewRegime, computeOldRegime } from "../utils";
+import { TAX_RULES } from "../taxRules";
 import { Help } from "./Guide";
 
 export default function TaxCalculator() {
@@ -22,7 +23,7 @@ export default function TaxCalculator() {
           Tax Calculator
           <Help text="Two ways India lets you calculate income tax — the new regime has lower rates but fewer deductions, the old regime has higher rates but lets you subtract things like insurance first. This tool works out which one costs you less." />
         </h1>
-        <p>Old vs new regime, FY 2025–26 (AY 2026–27) slab rates.</p>
+        <p>Old vs new regime, {TAX_RULES.label} slab rates.</p>
       </div>
       <div className="card">
         <div className="grid2">
@@ -88,7 +89,7 @@ export default function TaxCalculator() {
           <div className="tax-line"><span>Standard deduction</span><b>{fmtR(or_.stdDed)}</b></div>
           <div className="tax-line"><span>80C (capped at ₹1.5L)</span><b>{fmtR(or_.cappedC)}</b></div>
           <div className="tax-line"><span>80CCD(1B) (capped at ₹50K)</span><b>{fmtR(or_.cappedCcd)}</b></div>
-          <div className="tax-line"><span>80D (capped at ₹25K)</span><b>{fmtR(or_.cappedD)}</b></div>
+          <div className="tax-line"><span>80D (capped at {fmtR(or_.cap80D)})</span><b>{fmtR(or_.cappedD)}</b></div>
           <div className="tax-line"><span>Other deductions</span><b>{fmtR(otherDed || 0)}</b></div>
           <div className="tax-line"><span>Taxable income</span><b>{fmtR(or_.taxable)}</b></div>
           <div className="tax-line"><span>Tax before rebate</span><b>{fmtR(or_.taxBeforeCess + or_.rebate)}</b></div>

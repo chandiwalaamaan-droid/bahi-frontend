@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CSS } from "../styles";
 import { getDarkMode, applyDarkMode } from "../utils";
+import { TAX_RULES } from "../taxRules";
 import {
   IconDashboard, IconTransactions, IconInvoice, IconReport, IconCalculator,
   IconPercent, IconAdvisor, IconBuilding,
@@ -14,7 +15,7 @@ const FEATURE_DETAILS = [
     desc: "Business Health — the key numbers for your practice, for this month, the moment you sign in.",
     bullets: [
       <>Income, expenses, and net at a glance for the current month</>,
-      <>Estimated tax liability, so filing time doesn't bring a surprise</>,
+      <>A tax planning estimate, so filing time doesn't bring a surprise</>,
       <>A running read on whether you're trending ahead or behind last month</>,
     ],
   },
@@ -51,7 +52,7 @@ const FEATURE_DETAILS = [
   {
     Icon: IconCalculator,
     title: "Tax Calculator",
-    desc: "Compare the old and new income-tax regimes side by side, using current FY 2025–26 (AY 2026–27) slab rates.",
+    desc: `Compare the old and new income-tax regimes side by side, using current ${TAX_RULES.label} slab rates.`,
     bullets: [
       <>See your exact tax under both regimes, and which one wins for your numbers</>,
       <>Deductions under <b>80C, 80D, and 80CCD</b> factored into the old-regime side</>,
