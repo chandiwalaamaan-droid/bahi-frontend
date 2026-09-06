@@ -4,6 +4,8 @@ import { setUnauthorizedHandler, TOKEN_KEY, apiGet, apiPost, getDarkMode, applyD
 import { TABS } from "./constants";
 import { NAV_ICONS, IconHelp, IconTheme, IconBell, IconDownload, IconMenu, IconClose } from "./Icons";
 import AuthScreen from "./components/AuthScreen";
+import Home from "./pages/Home";
+import Features from "./pages/Features";
 import Transactions from "./components/Transactions";
 import TaxCalculator from "./components/TaxCalculator";
 import GstCalculator from "./components/GstCalculator";
@@ -42,6 +44,30 @@ export default function App() {
   const [appInstalled, setAppInstalled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Signed-out visitors land on the marketing Home page first, same as
+  // /features — both are real, linkable, shareable URLs (netlify.toml
+  // already rewrites everything to /index.html, same as /terms /privacy).
+  // "auth" covers the actual sign-in/sign-up screen at /login or /signup.
+  const pathToView = (path) => {
+    if (path === "/features") return "features";
+    if (path === "/login" || path === "/signup" || path === "/app") return "auth";
+    return "home";
+  };
+  const [publicView, setPublicView] = useState(() => pathToView(window.location.pathname));
+  const [authMode, setAuthMode] = useState(() => (window.location.pathname === "/signup" ? "register" : "login"));
+
+  const goTo = useCallback((view, path, mode) => {
+    setPublicView(view);
+    if (mode) setAuthMode(mode);
+    if (window.location.pathname !== path) window.history.pushState({}, "", path);
+  }, []);
+
+  useEffect(() => {
+    const onPopState = () => setPublicView(pathToView(window.location.pathname));
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     setUser(null);
@@ -49,6 +75,8 @@ export default function App() {
     setInvoices([]);
     setChat([]);
     setLoaded(false);
+    setPublicView("home");
+    window.history.pushState({}, "", "/");
   }, []);
 
   useEffect(() => {
@@ -65,6 +93,14 @@ export default function App() {
       try {
         const me = await apiGet("/auth/me");
         setUser(me);
+        // A returning, already-signed-in visitor may have landed on a
+        // marketing/auth URL (e.g. a bookmarked /login) — once we know
+        // they're authenticated there's nothing to show there, so tidy
+        // the address bar back to the app root.
+        const path = window.location.pathname;
+        if (path === "/login" || path === "/signup" || path === "/app" || path === "/features") {
+          window.history.replaceState({}, "", "/");
+        }
       } catch {
         localStorage.removeItem(TOKEN_KEY);
       } finally {
@@ -196,7 +232,34 @@ export default function App() {
   }
 
   if (!user) {
-    return <AuthScreen onAuthed={setUser} />;
+    if (publicView === "features") {
+      return (
+        <Features
+          onGetStarted={() => goTo("auth", "/signup", "register")}
+          onSignIn={() => goTo("auth", "/login", "login")}
+          onHome={() => goTo("home", "/")}
+        />
+      );
+    }
+    if (publicView === "home") {
+      return (
+        <Home
+          onGetStarted={() => goTo("auth", "/signup", "register")}
+          onSignIn={() => goTo("auth", "/login", "login")}
+          onViewFeatures={() => goTo("features", "/features")}
+        />
+      );
+    }
+    return (
+      <AuthScreen
+        onAuthed={(u) => {
+          window.history.pushState({}, "", "/");
+          setUser(u);
+        }}
+        initialMode={authMode}
+        onBack={() => goTo("home", "/")}
+      />
+    );
   }
 
   const selectTab = (id) => {

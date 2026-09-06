@@ -6,9 +6,9 @@ import GstCalculator from "./GstCalculator";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-export default function AuthScreen({ onAuthed }) {
+export default function AuthScreen({ onAuthed, initialMode, onBack }) {
   // modes: "login" | "register" | "forgot" | "reset" | "calculators"
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState(initialMode || "login");
   const [googleError, setGoogleError] = useState("");
   const googleBtnRef = useRef(null);
   const [email, setEmail] = useState("");
@@ -163,6 +163,15 @@ export default function AuthScreen({ onAuthed }) {
       <div className="bahi">
         <style>{CSS}</style>
         <div className="auth-wrap">
+          {onBack && (
+            <button
+              className="link-btn"
+              onClick={onBack}
+              style={{ position: "fixed", top: 18, left: 18, fontSize: 13, zIndex: 5, textDecoration: "none" }}
+            >
+              ← Back to Bahi
+            </button>
+          )}
           <div style={{ width: "100%", maxWidth: 720 }}>
             <div style={{ textAlign: "center", marginBottom: 22 }}>
               <div className="mark" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, fontFamily: "'Source Serif 4',serif", fontSize: 32, fontWeight: 700, color: "var(--primary)" }}>
@@ -189,6 +198,15 @@ export default function AuthScreen({ onAuthed }) {
     <div className="bahi">
       <style>{CSS}</style>
       <div className="auth-wrap">
+        {onBack && (
+          <button
+            className="link-btn"
+            onClick={onBack}
+            style={{ position: "fixed", top: 18, left: 18, fontSize: 13, zIndex: 5, textDecoration: "none" }}
+          >
+            ← Back to Bahi
+          </button>
+        )}
         <div className="auth-card">
           <div className="auth-seal">
             <img src="/logo.png" alt="" width={32} height={32} style={{ borderRadius: 8 }} />

@@ -117,6 +117,19 @@ export const IconClose = (props) => (
   </svg>
 );
 
+export const IconCheck = (props) => (
+  <svg {...base} {...props}>
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+export const IconShield = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 2.5l7.5 3v6c0 5-3.2 8-7.5 10-4.3-2-7.5-5-7.5-10v-6z" />
+    <path d="m9 12 2 2 4-4" />
+  </svg>
+);
+
 export const NAV_ICONS = {
   dashboard: IconDashboard,
   transactions: IconTransactions,
